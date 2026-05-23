@@ -29,7 +29,8 @@ export default function ReviewPanel({ review, loading }: Props) {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-900 rounded-xl border border-gray-700 p-5 text-sm text-gray-200 leading-relaxed">
+      <div className="flex-1 overflow-y-auto bg-gray-900 rounded-xl border border-gray-700 p-5 text-sm text-gray-200 leading-relaxed min-h-0">
+
         {review ? (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}

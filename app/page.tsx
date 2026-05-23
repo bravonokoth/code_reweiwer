@@ -54,9 +54,9 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="max-w-7xl mx-auto flex flex-col gap-6">
-        <div className="flex items-center justify-between">
+    <main className="h-[100dvh] bg-gray-950 text-white p-6 overflow-hidden">
+      <div className="max-w-7xl mx-auto flex flex-col gap-6 h-full">
+        <div className="flex items-center justify-between shrink-0">
           <div>
             <h1 className="text-2xl font-bold text-white">⚡ AI Code Reviewer</h1>
             <p className="text-gray-500 text-sm mt-0.5">Groq · LLaMA 3.3 70B · Real-time streaming</p>
@@ -71,21 +71,30 @@ export default function Home() {
           }}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="flex flex-col gap-4">
-            <CodeEditor code={code} language={language} onChange={setCode} onLanguageChange={setLanguage} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
+          <div className="flex flex-col gap-4 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <CodeEditor
+                code={code}
+                language={language}
+                onChange={setCode}
+                onLanguageChange={setLanguage}
+              />
+            </div>
             <button
               onClick={handleReview}
               disabled={loading || !code.trim()}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl font-semibold text-white transition-colors"
+              className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl font-semibold text-white transition-colors shrink-0"
             >
               {loading ? "Reviewing..." : "Review My Code →"}
             </button>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <ScoreCard review={review} />
-            <div className="flex-1 min-h-[400px]">
+          <div className="flex flex-col gap-4 overflow-hidden">
+            <div className="shrink-0">
+              <ScoreCard review={review} />
+            </div>
+            <div className="flex-1 min-h-0 overflow-hidden">
               <ReviewPanel review={review} loading={loading} />
             </div>
             {review && !loading && <CopyButton review={review} />}
@@ -95,4 +104,5 @@ export default function Home() {
     </main>
   );
 }
+
 

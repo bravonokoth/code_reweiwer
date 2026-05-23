@@ -25,7 +25,8 @@ export default function CodeEditor({ code, language, onChange, onLanguageChange 
   const lineCount = useMemo(() => code?.split("\n").length ?? 1, [code]);
 
   return (
-    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 h-full">
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -46,8 +47,8 @@ export default function CodeEditor({ code, language, onChange, onLanguageChange 
         </select>
       </div>
 
-      <div className="relative flex bg-gray-900 rounded-xl border border-gray-700 overflow-hidden focus-within:border-purple-500 transition-colors">
-        <div className="select-none pt-4 pb-4 pl-3 pr-2 text-right text-gray-600 font-mono text-sm leading-6 bg-gray-950 min-w-[40px]">
+      <div className="relative flex bg-gray-900 rounded-xl border border-gray-700 overflow-hidden focus-within:border-purple-500 transition-colors flex-1 min-h-0">
+        <div className="select-none pt-4 pb-4 pl-3 pr-2 text-right text-gray-600 font-mono text-sm leading-6 bg-gray-950 min-w-[40px] overflow-hidden">
           {Array.from({ length: lineCount }, (_, i) => (
             <div key={i}>{i + 1}</div>
           ))}
@@ -58,7 +59,7 @@ export default function CodeEditor({ code, language, onChange, onLanguageChange 
           onChange={(e) => onChange(e.target.value)}
           placeholder="// Paste your code here..."
           spellCheck={false}
-          className="flex-1 bg-transparent text-green-400 font-mono text-sm p-4 pl-2 resize-none focus:outline-none leading-6 min-h-[480px]"
+          className="flex-1 bg-transparent text-green-400 font-mono text-sm p-4 pl-2 resize-none focus:outline-none leading-6 min-h-0 h-full overflow-y-auto"
           style={{ tabSize: 2 } as React.CSSProperties}
           onKeyDown={(e) => {
             if (e.key === "Tab") {
@@ -71,6 +72,7 @@ export default function CodeEditor({ code, language, onChange, onLanguageChange 
           }}
         />
       </div>
+
 
       <div className="flex justify-between text-xs text-gray-600 font-mono px-1">
         <span>{lineCount} lines</span>
