@@ -73,7 +73,7 @@ export default function Home() {
             >
               ← Back
             </Link>
-            <h1 className="text-2xl font-bold text-white">⚡ AI Code Reviewer</h1>
+            <h1 className="text-2xl font-bold text-white">Code Reviewer</h1>
             <p className="text-gray-500 text-sm mt-0.5">Groq · LLaMA 3.3 70B · Real-time streaming</p>
           </div>
           <HistoryPanel onRestore={restoreEntry} />

@@ -1,42 +1,37 @@
-import Link from "next/link";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "AI Code Reviewer — Instant feedback powered by LLaMA 3.3 & Groq",
-  description:
-    "Paste any code or import a GitHub PR and receive real-time AI-powered feedback on quality, security, performance, and style — free to use.",
-};
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const FEATURES = [
   {
     icon: "⚡",
-    title: "Real-time streaming",
-    desc: "Reviews stream token-by-token via ReadableStream — no waiting for a full response.",
+    title: "Streams in real time",
+    desc: "Powered by Groq's LPU hardware — results appear token by token at 400+ tokens/sec.",
   },
   {
-    icon: "🧠",
-    title: "LLaMA 3.3 70B",
-    desc: "Meta's top open-source model running on Groq's ultra-fast LPU hardware.",
+    icon: "🔍",
+    title: "6 review dimensions",
+    desc: "Summary, strengths, issues with severity, security, performance, and a refactored version.",
   },
   {
     icon: "📊",
-    title: "Score visualisation",
-    desc: "Animated progress bars and a radial gauge across 4 quality dimensions.",
+    title: "Instant scoring",
+    desc: "Readability, performance, security and overall scored out of 10 with animated visuals.",
   },
   {
     icon: "🐙",
     title: "GitHub PR import",
-    desc: "Paste any public pull-request URL to fetch and review its diff instantly.",
-  },
-  {
-    icon: "⎘",
-    title: "Copy refactored code",
-    desc: "One-click extraction of the AI-generated refactored version from the review.",
+    desc: "Paste any public pull request URL and review the full diff without copy-pasting.",
   },
   {
     icon: "🕒",
     title: "Review history",
-    desc: "Last 10 reviews saved locally and restorable with a single click.",
+    desc: "Your last 10 reviews are saved locally and restorable with a single click.",
+  },
+  {
+    icon: "🌐",
+    title: "10 languages",
+    desc: "JavaScript, TypeScript, Python, Java, Go, Rust, C++, PHP, Ruby, and Swift.",
   },
 ];
 
@@ -44,181 +39,668 @@ const LANGUAGES = [
   "JavaScript",
   "TypeScript",
   "Python",
-  "Java",
   "Go",
   "Rust",
-  "C++",
-  "PHP",
-  "Ruby",
+  "Java",
   "Swift",
+  "C++",
 ];
 
-export default function LandingPage() {
-  return (
-    <main className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {/* ── Fading square-grid background ── */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: "none",
-          backgroundImage: `
-            linear-gradient(rgba(37,99,235,0.18) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(37,99,235,0.18) 1px, transparent 1px)
-          `,
-          backgroundSize: "48px 48px",
-          maskImage:
-            "radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 80%)",
-          WebkitMaskImage:
-            "radial-gradient(ellipse 80% 70% at 50% 30%, black 20%, transparent 80%)",
-        }}
-      />
+const TICKER_CODE = `// Real review. Real time.
+function debounce(fn, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(fn, delay, ...args);
+  };
+}`;
 
-      {/* ── Nav ── */}
+export default function LandingPage() {
+  const router = useRouter();
+  const [typedCode, setTypedCode] = useState("");
+  const [langIdx, setLangIdx] = useState(0);
+
+  useEffect(() => {
+    let i = 0;
+    const interval = window.setInterval(() => {
+      i++;
+      setTypedCode(TICKER_CODE.slice(0, i));
+      if (i >= TICKER_CODE.length) window.clearInterval(interval);
+    }, 18);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      setLangIdx((i) => (i + 1) % LANGUAGES.length);
+    }, 1400);
+    return () => window.clearInterval(t);
+  }, []);
+
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#09090b",
+        color: "#fafafa",
+        fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+        overflowX: "hidden",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .hero-glow {
+          position: absolute;
+          width: 700px; height: 700px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+          top: -200px; left: 50%;
+          transform: translateX(-50%);
+          pointer-events: none;
+        }
+
+        .grid-bg {
+          position: fixed; inset: 0; z-index: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+          background-size: 40px 40px;
+          pointer-events: none;
+        }
+
+        .fade-up {
+          opacity: 0; transform: translateY(24px);
+          animation: fadeUp 0.7s ease forwards;
+        }
+        @keyframes fadeUp {
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .badge-lang {
+          display: inline-block;
+          padding: 3px 10px;
+          border-radius: 99px;
+          font-size: 12px;
+          font-weight: 500;
+          border: 1px solid rgba(139,92,246,0.4);
+          background: rgba(139,92,246,0.1);
+          color: #a78bfa;
+          font-family: 'DM Mono', monospace;
+          transition: opacity 0.3s;
+          min-width: 90px;
+          text-align: center;
+        }
+
+        .cta-primary {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 14px 32px;
+          background: #7c3aed;
+          color: #fff;
+          border: none; border-radius: 12px;
+          font-size: 16px; font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+          box-shadow: 0 0 0 0 rgba(124,58,237,0.4);
+          font-family: inherit;
+          text-decoration: none;
+        }
+        .cta-primary:hover {
+          background: #6d28d9;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 32px rgba(124,58,237,0.35);
+        }
+        .cta-primary:active { transform: translateY(0); }
+
+        .cta-secondary {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 14px 28px;
+          background: transparent;
+          color: #a1a1aa;
+          border: 1px solid #27272a;
+          border-radius: 12px;
+          font-size: 15px; font-weight: 500;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+          font-family: inherit;
+          text-decoration: none;
+        }
+        .cta-secondary:hover { border-color: #52525b; color: #fafafa; }
+
+        .code-window {
+          background: #111113;
+          border: 1px solid #27272a;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+        }
+        .code-titlebar {
+          display: flex; align-items: center; gap: 6px;
+          padding: 12px 16px;
+          background: #18181b;
+          border-bottom: 1px solid #27272a;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .feature-card {
+          background: #111113;
+          border: 1px solid #1c1c1f;
+          border-radius: 14px;
+          padding: 24px;
+          transition: border-color 0.2s, transform 0.2s;
+        }
+        .feature-card:hover {
+          border-color: #3f3f46;
+          transform: translateY(-3px);
+        }
+
+        .stat-item { text-align: center; }
+        .stat-num {
+          font-size: 36px; font-weight: 600;
+          background: linear-gradient(135deg, #a78bfa, #7c3aed);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        nav a {
+          color: #71717a; font-size: 14px; text-decoration: none;
+          transition: color 0.2s;
+        }
+        nav a:hover { color: #fafafa; }
+      `}</style>
+
+      <div className="grid-bg" />
+      <div className="hero-glow" />
+
       <nav
-        style={{ position: "relative", zIndex: 10 }}
-        className="border-b border-blue-900/50 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto w-full"
+        style={{
+          position: "relative",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "20px 48px",
+          borderBottom: "1px solid #18181b",
+        }}
       >
-        <span className="font-bold text-lg tracking-tight">
-          ⚡ <span style={{ color: "#3b82f6" }}>AI</span> Code Reviewer
-        </span>
-        <Link
-          href="/review"
-          style={{ background: "#1d4ed8" }}
-          className="text-sm hover:brightness-110 transition-all px-4 py-2 rounded-lg font-semibold"
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 20 }}>⚡</span>
+          <span style={{ fontWeight: 600, fontSize: 16, color: "#fafafa" }}>
+            CodeReview AI
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 32 }}>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="https://github.com" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+        </div>
+        <button
+          className="cta-primary"
+          style={{ padding: "8px 20px", fontSize: 14 }}
+          onClick={() => router.push("/review")}
         >
-          Open Reviewer →
-        </Link>
+          Open App
+        </button>
       </nav>
 
-      {/* ── Hero ── */}
       <section
-        style={{ position: "relative", zIndex: 10 }}
-        className="flex-1 flex flex-col items-center justify-center text-center px-6 py-24 gap-8"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          padding: "96px 24px 80px",
+          gap: 32,
+        }}
       >
-        {/* badge */}
-        <span
+        <div className="fade-up" style={{ animationDelay: "0ms" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 14px",
+              borderRadius: 99,
+              border: "1px solid #27272a",
+              background: "#111113",
+              fontSize: 13,
+              color: "#71717a",
+            }}
+          >
+            <span style={{ color: "#a78bfa" }}>✦</span>
+            Powered by Groq · LLaMA 3.3 70B · Free forever
+            <span className="badge-lang">{LANGUAGES[langIdx]}</span>
+          </div>
+        </div>
+
+        <div className="fade-up" style={{ animationDelay: "120ms" }}>
+          <h1
+            style={{
+              fontSize: "clamp(40px, 6vw, 72px)",
+              fontWeight: 600,
+              lineHeight: 1.1,
+              letterSpacing: "-0.03em",
+              maxWidth: 760,
+            }}
+          >
+            Your code, reviewed by{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              a senior engineer
+            </span>
+            . Instantly.
+          </h1>
+        </div>
+
+        <div className="fade-up" style={{ animationDelay: "220ms" }}>
+          <p
+            style={{
+              fontSize: 18,
+              color: "#71717a",
+              maxWidth: 520,
+              lineHeight: 1.7,
+            }}
+          >
+            Paste any code or import a GitHub PR. Get a structured review covering
+            quality, security, performance, and a refactored version — streaming live.
+          </p>
+        </div>
+
+        <div
+          className="fade-up"
           style={{
-            background: "rgba(29,78,216,0.2)",
-            color: "#93c5fd",
-            borderColor: "rgba(59,130,246,0.4)",
+            animationDelay: "320ms",
+            display: "flex",
+            gap: 12,
+            flexWrap: "wrap",
+            justifyContent: "center",
           }}
-          className="text-xs font-semibold tracking-widest uppercase border px-3 py-1 rounded-full"
         >
-          Groq · LLaMA 3.3 70B · Real-time streaming
-        </span>
-
-        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold leading-tight max-w-4xl">
-          Get instant{" "}
-          <span
-            style={{
-              backgroundImage: "linear-gradient(90deg, #3b82f6, #1d4ed8)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            AI code reviews
-          </span>{" "}
-          in seconds
-        </h1>
-
-        <p className="text-gray-400 text-lg sm:text-xl max-w-2xl">
-          Paste any snippet or import a GitHub PR and receive structured
-          feedback on quality, security, performance, and style — completely
-          free to use.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Link
-            href="/review"
-            style={{
-              background: "#1d4ed8",
-              boxShadow: "0 8px 32px rgba(29,78,216,0.35)",
-            }}
-            className="px-8 py-4 rounded-xl font-bold text-lg transition-all hover:brightness-110 hover:scale-[1.03] active:scale-100"
-          >
-            Start reviewing code →
-          </Link>
-          <a
-            href="https://github.com/bravonokoth/code_reviewer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-8 py-4 border border-gray-700 hover:border-blue-600 rounded-xl font-semibold text-lg transition-colors text-gray-300 hover:text-white"
-          >
-            View on GitHub
+          <button className="cta-primary" onClick={() => router.push("/review")}>
+            Start reviewing for free
+            <span style={{ fontSize: 18 }}>→</span>
+          </button>
+          <a className="cta-secondary" href="#how-it-works">
+            See how it works
           </a>
         </div>
 
-        {/* language pills */}
-        <div className="flex flex-wrap justify-center gap-2 mt-2">
-          {LANGUAGES.map((lang) => (
-            <span
-              key={lang}
-              className="text-xs font-mono bg-gray-800/80 border border-gray-700 text-gray-400 px-3 py-1 rounded-full"
+        <div
+          className="fade-up"
+          style={{
+            animationDelay: "440ms",
+            width: "100%",
+            maxWidth: 680,
+            marginTop: 16,
+          }}
+        >
+          <div className="code-window">
+            <div className="code-titlebar">
+              <div className="dot" style={{ background: "#ef4444" }} />
+              <div className="dot" style={{ background: "#f59e0b" }} />
+              <div className="dot" style={{ background: "#22c55e" }} />
+              <span
+                style={{
+                  marginLeft: 8,
+                  fontSize: 12,
+                  color: "#52525b",
+                  fontFamily: "'DM Mono', monospace",
+                }}
+              >
+                app/utils/debounce.js
+              </span>
+            </div>
+            <div
+              style={{
+                padding: "20px 24px",
+                fontFamily: "'DM Mono', monospace",
+                fontSize: 13,
+                lineHeight: 1.8,
+                color: "#a1a1aa",
+                minHeight: 160,
+                textAlign: "left",
+                whiteSpace: "pre",
+              }}
             >
-              {lang}
-            </span>
-          ))}
+              <span style={{ color: "#71717a" }}>{typedCode.match(/\/\/.*$/)?.[0] ?? ""}</span>
+              {"\n"}
+              <span style={{ color: "#c4b5fd" }}>function </span>
+              <span style={{ color: "#6ee7b7" }}>debounce</span>
+              <span style={{ color: "#e2e8f0" }}>(fn, delay) {"{"}</span>
+              {"\n  "}
+              <span style={{ color: "#c4b5fd" }}>let </span>
+              <span style={{ color: "#e2e8f0" }}>timer;</span>
+              {"\n  "}
+              <span style={{ color: "#c4b5fd" }}>return </span>
+              <span style={{ color: "#e2e8f0" }}>(...args) {">"} {"{"}</span>
+              {"\n    "}
+              <span style={{ color: "#6ee7b7" }}>clearTimeout</span>
+              <span style={{ color: "#e2e8f0" }}>(timer);</span>
+              {"\n    "}
+              <span style={{ color: "#e2e8f0" }}>timer = </span>
+              <span style={{ color: "#6ee7b7" }}>setTimeout</span>
+              <span style={{ color: "#e2e8f0" }}>(fn, delay, ...args);</span>
+              {"\n  };\n"}
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 2,
+                  height: 14,
+                  background: "#a78bfa",
+                  marginLeft: 2,
+                  animation: "blink 1s step-end infinite",
+                }}
+              />
+              {"}"}
+            </div>
+
+            <div
+              style={{
+                borderTop: "1px solid #27272a",
+                padding: "12px 24px",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                background: "#0d0d0f",
+              }}
+            >
+              <span style={{ fontSize: 12, color: "#52525b" }}>AI review complete</span>
+              {[
+                { label: "Quality", val: 82, color: "#a78bfa" },
+                { label: "Security", val: 95, color: "#34d399" },
+                { label: "Perf", val: 76, color: "#f59e0b" },
+              ].map((s) => (
+                <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 11, color: "#52525b" }}>{s.label}</span>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 3,
+                      background: "#1c1c1f",
+                      borderRadius: 99,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${s.val}%`,
+                        height: "100%",
+                        background: s.color,
+                        borderRadius: 99,
+                        transition: "width 1s ease",
+                      }}
+                    />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: s.color,
+                      fontFamily: "'DM Mono', monospace",
+                    }}
+                  >
+                    {s.val}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Features ── */}
       <section
-        style={{ position: "relative", zIndex: 10 }}
-        className="max-w-7xl mx-auto w-full px-6 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          borderTop: "1px solid #18181b",
+          borderBottom: "1px solid #18181b",
+          padding: "48px 24px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+          gap: 32,
+          maxWidth: 900,
+          margin: "0 auto",
+          textAlign: "center",
+        }}
       >
-        {FEATURES.map((f) => (
-          <div
-            key={f.title}
-            style={{ borderColor: "rgba(255,255,255,0.07)" }}
-            className="bg-gray-900/70 backdrop-blur border rounded-2xl p-6 flex flex-col gap-3 hover:border-blue-700/60 transition-colors"
-          >
-            <span className="text-3xl">{f.icon}</span>
-            <h2 className="font-bold text-base text-white">{f.title}</h2>
-            <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+        {[
+          { num: "400+", label: "tokens/sec via Groq" },
+          { num: "10", label: "languages supported" },
+          { num: "6", label: "review dimensions" },
+          { num: "$0", label: "cost to run" },
+        ].map((s) => (
+          <div key={s.label} className="stat-item">
+            <div className="stat-num">{s.num}</div>
+            <div style={{ fontSize: 13, color: "#52525b", marginTop: 4 }}>{s.label}</div>
           </div>
         ))}
       </section>
 
-      {/* ── CTA banner ── */}
       <section
-        style={{ position: "relative", zIndex: 10 }}
-        className="max-w-7xl mx-auto w-full px-6 pb-20"
+        id="features"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 1000,
+          margin: "0 auto",
+          padding: "96px 24px",
+        }}
       >
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p
+            style={{
+              fontSize: 12,
+              color: "#7c3aed",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+            }}
+          >
+            Features
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(28px, 4vw, 42px)",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Everything a senior engineer would catch
+          </h2>
+        </div>
+
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(29,78,216,0.25), rgba(37,99,235,0.15))",
-            borderColor: "rgba(59,130,246,0.3)",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 16,
           }}
-          className="border rounded-2xl p-10 flex flex-col sm:flex-row items-center justify-between gap-6"
         >
-          <div>
-            <p className="font-bold text-xl">Ready to review your code?</p>
-            <p className="text-gray-400 text-sm mt-1">
-              No sign-up required. 100% free on Groq&apos;s generous free tier.
-            </p>
-          </div>
-          <Link
-            href="/review"
-            style={{ background: "#1d4ed8" }}
-            className="shrink-0 px-8 py-3 rounded-xl font-bold transition-all hover:brightness-110 hover:scale-[1.03] active:scale-100"
-          >
-            Open Reviewer →
-          </Link>
+          {FEATURES.map((f, i) => (
+            <div key={i} className="feature-card" style={{ animationDelay: `${i * 60}ms` }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6, color: "#fafafa" }}>
+                {f.title}
+              </div>
+              <div style={{ fontSize: 14, color: "#71717a", lineHeight: 1.6 }}>{f.desc}</div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer
-        style={{ position: "relative", zIndex: 10 }}
-        className="border-t border-gray-800 py-6 text-center text-gray-600 text-xs"
+      <section
+        id="how-it-works"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 720,
+          margin: "0 auto",
+          padding: "0 24px 96px",
+        }}
       >
-        Built with Next.js, Groq &amp; LLaMA 3.3 70B · Deployed on Vercel ·
-        $0/month
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <p
+            style={{
+              fontSize: 12,
+              color: "#7c3aed",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+            }}
+          >
+            How it works
+          </p>
+          <h2
+            style={{
+              fontSize: "clamp(28px, 4vw, 42px)",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Three steps to better code
+          </h2>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {[
+            {
+              n: "01",
+              title: "Paste your code or import a PR",
+              desc: "Drop any snippet or paste a GitHub pull request URL. Supports 10 languages.",
+            },
+            {
+              n: "02",
+              title: "Watch the review stream live",
+              desc: "Groq's LPU delivers tokens at 400+/sec — results appear as the AI thinks.",
+            },
+            {
+              n: "03",
+              title: "Copy the refactored version",
+              desc: "One click copies the improved code. Scorecard and history saved automatically.",
+            },
+          ].map((step, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: 24,
+                paddingBottom: i < 2 ? 40 : 0,
+                borderLeft: i < 2 ? "1px solid #27272a" : "none",
+                marginLeft: 20,
+                paddingLeft: 32,
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  left: -16,
+                  top: 0,
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  background: "#7c3aed",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#fff",
+                  fontFamily: "'DM Mono', monospace",
+                  flexShrink: 0,
+                }}
+              >
+                {step.n}
+              </div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: "#fafafa", marginBottom: 6 }}>
+                  {step.title}
+                </div>
+                <div style={{ fontSize: 14, color: "#71717a", lineHeight: 1.6 }}>{step.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        style={{
+          position: "relative",
+          zIndex: 1,
+          margin: "0 24px 96px",
+          maxWidth: 960,
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+      >
+        <div
+          style={{
+            background: "linear-gradient(135deg, #1a0a2e 0%, #16042a 50%, #0f0218 100%)",
+            border: "1px solid #3b0764",
+            borderRadius: 24,
+            padding: "64px 48px",
+            textAlign: "center",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              width: 400,
+              height: 400,
+              background: "radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%)",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%,-50%)",
+              pointerEvents: "none",
+            }}
+          />
+          <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 600, letterSpacing: "-0.02em", marginBottom: 16 }}>
+            Ready to write better code?
+          </h2>
+          <p style={{ fontSize: 16, color: "#71717a", marginBottom: 32 }}>
+            No signup. No API key needed. Free forever.
+          </p>
+          <button className="cta-primary" style={{ fontSize: 16, padding: "16px 40px" }} onClick={() => router.push("/review")}>
+            Start your first review →
+          </button>
+        </div>
+      </section>
+
+      <footer
+        style={{
+          position: "relative",
+          zIndex: 1,
+          borderTop: "1px solid #18181b",
+          padding: "24px 48px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span>⚡</span>
+          <span style={{ fontSize: 14, color: "#52525b" }}>CodeReview AI · Built with Next.js</span>
+        </div>
+        <span style={{ fontSize: 13, color: "#3f3f46" }}>Free & open source · $0/month</span>
       </footer>
+
+      <style>{`
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      `}</style>
     </main>
   );
 }
